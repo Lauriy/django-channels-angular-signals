@@ -1,0 +1,74 @@
+<html>
+<body>
+<h1>Doodads</h1>
+<table id="doodads-table">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>State</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+<script>
+    const stateColorMap = {
+        'Pending': '#FFA500',
+        'Failed': '#FF0000',
+        'Succeeded': '#008000'
+    }
+    let doodads = [];
+    const drawList = () => {
+        const tableBody = document.querySelector('#doodads-table tbody');
+        tableBody.innerHTML = "";
+        doodads.forEach(function (doodad) {
+            const row = document.createElement("tr");
+
+            const idCell = document.createElement("td");
+            idCell.textContent = doodad.id;
+            row.appendChild(idCell);
+
+            const nameCell = document.createElement("td");
+            nameCell.textContent = doodad.name;
+            row.appendChild(nameCell);
+
+            const stateCell = document.createElement("td");
+            stateCell.textContent = doodad.state;
+            stateCell.style['background-color'] = stateColorMap[doodad.state];
+            row.appendChild(stateCell);
+
+            tableBody.appendChild(row);
+        });
+    }
+    const doodadSocket = new WebSocket('ws://localhost:8000/ws/doodads-stream/');
+
+    doodadSocket.onopen = function (event) {
+        console.log('Doodad socket opened:', event);
+    };
+    doodadSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'doodads.all') {
+            doodads = data.doodads;
+            drawList();
+        } else if (data.type === 'doodads.update') {
+            let found = false;
+            doodads.forEach(function (doodad, index) {
+                if (doodad.id === data.doodad.id) {
+                    doodads[index] = data.doodad;
+                    found = true;
+                }
+            });
+            if (!found) {
+                doodads.push(data.doodad);
+            }
+            drawList();
+        }
+    };
+    doodadSocket.onclose = function (e) {
+        console.error('Doodad socket closed unexpectedly');
+        console.log(e);
+    };
+</script>
+</body>
+</html>
