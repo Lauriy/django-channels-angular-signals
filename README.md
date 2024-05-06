@@ -1,4 +1,4 @@
-## An exploration into Angular 16 real-time WebSocket-based UI
+## An exploration into Angular 18 real-time WebSocket-based UI
 
 ### Get the backend working
 
