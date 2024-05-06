@@ -15,7 +15,7 @@ class DoodadsConsumer(AsyncWebsocketConsumer):
         print('DooodadsConsumer: connect')
         await self.accept()
         await self._send_initial_data()
-        await self.channel_layer.group_add("doodads_group", self.channel_name)
+        await self.channel_layer.group_add('doodads_group', self.channel_name)
 
     async def disconnect(self, close_code):
         print(f'DooodadsConsumer: disconnect, close_code {close_code}')

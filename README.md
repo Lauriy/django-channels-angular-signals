@@ -5,7 +5,7 @@
 ```shell
 docker-compose up -d
 cd backend
-python3.11 -m venv venv
+python3.12 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python manage.py migrate
@@ -21,7 +21,7 @@ appear in your table as you add them in the admin panel.
 
 ```shell
 cd frontend
-nvm use lts/hydrogen
+nvm use 22.1.0
 npm install
 ng serve
 ```

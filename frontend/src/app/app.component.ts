@@ -1,32 +1,45 @@
-import {Component} from '@angular/core';
-import {Doodad, WebsocketService} from "./services/websocket.service";
+import {ChangeDetectionStrategy, Component, inject, OnDestroy, signal} from '@angular/core';
+import {RouterOutlet} from '@angular/router';
+import {Doodad, WebsocketService} from "./websocket.service";
+import {Subscription} from "rxjs";
 
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrl: './app.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent {
-  title = 'Doodads';
-  doodads: Doodad[] = [];
+export class AppComponent implements OnDestroy {
+  websocketService: WebsocketService;
+  websocketSubscription: Subscription;
+  internalDoodads: Doodad[] = [];
+  doodads = signal<Doodad[]>([]);
 
-  constructor(private websocketService: WebsocketService) {
-    websocketService.messages.subscribe(msg => {
-      console.log(`Received message of type: ${msg.type}`);
+  constructor() {
+    this.websocketService = inject(WebsocketService);
+    this.websocketSubscription = this.websocketService.messages$.subscribe(msg => {
+      console.debug(`Received message of type: ${msg.type}`);
       if (msg.type === 'doodads.all') {
-        this.doodads = msg.doodads!;
+        this.internalDoodads = msg.doodads!;
       } else if (msg.type === 'doodads.update') {
         let found = false;
-        this.doodads.forEach((doodad, index) => {
+        this.internalDoodads.forEach((doodad, index) => {
           if (doodad.id === msg.doodad!.id) {
-            this.doodads[index] = msg.doodad!;
+            this.internalDoodads[index] = msg.doodad!;
             found = true;
           }
         });
         if (!found) {
-          this.doodads.push(msg.doodad!);
+          this.internalDoodads.push(msg.doodad!);
         }
       }
+      this.doodads.update(() => [...this.internalDoodads]);
     });
+  }
+
+  ngOnDestroy() {
+    this.websocketSubscription.unsubscribe();
   }
 }

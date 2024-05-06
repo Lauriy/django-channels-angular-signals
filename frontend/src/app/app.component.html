@@ -8,10 +8,16 @@
   </tr>
   </thead>
   <tbody>
-  <tr *ngFor="let doodad of doodads">
-    <td>{{ doodad.id }}</td>
-    <td>{{ doodad.name }}</td>
-    <td>{{ doodad.state }}</td>
-  </tr>
+    @for (doodad of doodads(); track doodad.id) {
+      <tr>
+        <td>{{ doodad.id }}</td>
+        <td>{{ doodad.name }}</td>
+        <td>{{ doodad.state }}</td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="3">No doodads sent to us yet</td>
+      </tr>
+    }
   </tbody>
 </table>

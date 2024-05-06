@@ -21,13 +21,13 @@ export interface Message {
 })
 export class WebsocketService {
   private subject!: AnonymousSubject<MessageEvent>;
-  public messages: Subject<Message>;
+  public messages$: Subject<Message>;
 
   constructor() {
-    this.messages = <Subject<Message>>this.connect(DOODADS_URL).pipe(
+    this.messages$ = <Subject<Message>>this.connect(DOODADS_URL).pipe(
       map(
         (response: MessageEvent): Message => {
-          console.log(response.data);
+          console.debug(response.data);
 
           return JSON.parse(response.data);
         }
@@ -38,7 +38,7 @@ export class WebsocketService {
   public connect(url: string): AnonymousSubject<MessageEvent> {
     if (!this.subject) {
       this.subject = this.create(url);
-      console.log('Successfully connected: ' + url);
+      console.debug('Successfully connected: ' + url);
     }
 
     return this.subject;
@@ -57,7 +57,7 @@ export class WebsocketService {
       error: null,
       complete: null,
       next: (data: Object) => {
-        console.log('Message sent to websocket: ', data);
+        console.debug('Message sent to websocket: ', data);
         if (ws.readyState === WebSocket.OPEN) {
           ws.send(JSON.stringify(data));
         }
